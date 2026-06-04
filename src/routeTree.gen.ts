@@ -9,8 +9,68 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as VaultRouteImport } from './routes/vault'
+import { Route as SuccessRouteImport } from './routes/success'
+import { Route as StudioRouteImport } from './routes/studio'
+import { Route as SizingRouteImport } from './routes/sizing'
+import { Route as ReviewsRouteImport } from './routes/reviews'
+import { Route as JournalRouteImport } from './routes/journal'
+import { Route as ContactRouteImport } from './routes/contact'
+import { Route as CollectionsRouteImport } from './routes/collections'
+import { Route as CheckoutRouteImport } from './routes/checkout'
+import { Route as CareRouteImport } from './routes/care'
 import { Route as IndexRouteImport } from './routes/index'
 
+const VaultRoute = VaultRouteImport.update({
+  id: '/vault',
+  path: '/vault',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SuccessRoute = SuccessRouteImport.update({
+  id: '/success',
+  path: '/success',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const StudioRoute = StudioRouteImport.update({
+  id: '/studio',
+  path: '/studio',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SizingRoute = SizingRouteImport.update({
+  id: '/sizing',
+  path: '/sizing',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ReviewsRoute = ReviewsRouteImport.update({
+  id: '/reviews',
+  path: '/reviews',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const JournalRoute = JournalRouteImport.update({
+  id: '/journal',
+  path: '/journal',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ContactRoute = ContactRouteImport.update({
+  id: '/contact',
+  path: '/contact',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CollectionsRoute = CollectionsRouteImport.update({
+  id: '/collections',
+  path: '/collections',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CheckoutRoute = CheckoutRouteImport.update({
+  id: '/checkout',
+  path: '/checkout',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CareRoute = CareRouteImport.update({
+  id: '/care',
+  path: '/care',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
@@ -19,28 +79,172 @@ const IndexRoute = IndexRouteImport.update({
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/care': typeof CareRoute
+  '/checkout': typeof CheckoutRoute
+  '/collections': typeof CollectionsRoute
+  '/contact': typeof ContactRoute
+  '/journal': typeof JournalRoute
+  '/reviews': typeof ReviewsRoute
+  '/sizing': typeof SizingRoute
+  '/studio': typeof StudioRoute
+  '/success': typeof SuccessRoute
+  '/vault': typeof VaultRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/care': typeof CareRoute
+  '/checkout': typeof CheckoutRoute
+  '/collections': typeof CollectionsRoute
+  '/contact': typeof ContactRoute
+  '/journal': typeof JournalRoute
+  '/reviews': typeof ReviewsRoute
+  '/sizing': typeof SizingRoute
+  '/studio': typeof StudioRoute
+  '/success': typeof SuccessRoute
+  '/vault': typeof VaultRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/care': typeof CareRoute
+  '/checkout': typeof CheckoutRoute
+  '/collections': typeof CollectionsRoute
+  '/contact': typeof ContactRoute
+  '/journal': typeof JournalRoute
+  '/reviews': typeof ReviewsRoute
+  '/sizing': typeof SizingRoute
+  '/studio': typeof StudioRoute
+  '/success': typeof SuccessRoute
+  '/vault': typeof VaultRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/'
+  fullPaths:
+    | '/'
+    | '/care'
+    | '/checkout'
+    | '/collections'
+    | '/contact'
+    | '/journal'
+    | '/reviews'
+    | '/sizing'
+    | '/studio'
+    | '/success'
+    | '/vault'
   fileRoutesByTo: FileRoutesByTo
-  to: '/'
-  id: '__root__' | '/'
+  to:
+    | '/'
+    | '/care'
+    | '/checkout'
+    | '/collections'
+    | '/contact'
+    | '/journal'
+    | '/reviews'
+    | '/sizing'
+    | '/studio'
+    | '/success'
+    | '/vault'
+  id:
+    | '__root__'
+    | '/'
+    | '/care'
+    | '/checkout'
+    | '/collections'
+    | '/contact'
+    | '/journal'
+    | '/reviews'
+    | '/sizing'
+    | '/studio'
+    | '/success'
+    | '/vault'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  CareRoute: typeof CareRoute
+  CheckoutRoute: typeof CheckoutRoute
+  CollectionsRoute: typeof CollectionsRoute
+  ContactRoute: typeof ContactRoute
+  JournalRoute: typeof JournalRoute
+  ReviewsRoute: typeof ReviewsRoute
+  SizingRoute: typeof SizingRoute
+  StudioRoute: typeof StudioRoute
+  SuccessRoute: typeof SuccessRoute
+  VaultRoute: typeof VaultRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/vault': {
+      id: '/vault'
+      path: '/vault'
+      fullPath: '/vault'
+      preLoaderRoute: typeof VaultRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/success': {
+      id: '/success'
+      path: '/success'
+      fullPath: '/success'
+      preLoaderRoute: typeof SuccessRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/studio': {
+      id: '/studio'
+      path: '/studio'
+      fullPath: '/studio'
+      preLoaderRoute: typeof StudioRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/sizing': {
+      id: '/sizing'
+      path: '/sizing'
+      fullPath: '/sizing'
+      preLoaderRoute: typeof SizingRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/reviews': {
+      id: '/reviews'
+      path: '/reviews'
+      fullPath: '/reviews'
+      preLoaderRoute: typeof ReviewsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/journal': {
+      id: '/journal'
+      path: '/journal'
+      fullPath: '/journal'
+      preLoaderRoute: typeof JournalRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/contact': {
+      id: '/contact'
+      path: '/contact'
+      fullPath: '/contact'
+      preLoaderRoute: typeof ContactRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/collections': {
+      id: '/collections'
+      path: '/collections'
+      fullPath: '/collections'
+      preLoaderRoute: typeof CollectionsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/checkout': {
+      id: '/checkout'
+      path: '/checkout'
+      fullPath: '/checkout'
+      preLoaderRoute: typeof CheckoutRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/care': {
+      id: '/care'
+      path: '/care'
+      fullPath: '/care'
+      preLoaderRoute: typeof CareRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/': {
       id: '/'
       path: '/'
@@ -53,17 +257,17 @@ declare module '@tanstack/react-router' {
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  CareRoute: CareRoute,
+  CheckoutRoute: CheckoutRoute,
+  CollectionsRoute: CollectionsRoute,
+  ContactRoute: ContactRoute,
+  JournalRoute: JournalRoute,
+  ReviewsRoute: ReviewsRoute,
+  SizingRoute: SizingRoute,
+  StudioRoute: StudioRoute,
+  SuccessRoute: SuccessRoute,
+  VaultRoute: VaultRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-import type { getRouter } from './router.tsx'
-import type { startInstance } from './start.ts'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-    config: Awaited<ReturnType<typeof startInstance.getOptions>>
-  }
-}
