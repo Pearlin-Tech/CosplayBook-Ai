@@ -1,5 +1,5 @@
 import { motion } from "framer-motion";
-import { ReactNode } from "react";
+import { ElementType, ReactNode } from "react";
 import { cn } from "@/lib/utils";
 
 /**
@@ -17,7 +17,7 @@ export function TextSplit({
   className?: string;
   delay?: number;
   stagger?: number;
-  as?: keyof JSX.IntrinsicElements;
+  as?: ElementType;
 }) {
   const words = text.split(" ");
   return (
