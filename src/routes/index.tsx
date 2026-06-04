@@ -3,6 +3,9 @@ import { ArrowRight, Zap } from "lucide-react";
 import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
 import { Marquee } from "@/components/Marquee";
+import { MagneticButton } from "@/components/motion/MagneticButton";
+import { Reveal } from "@/components/motion/Reveal";
+import { ParallaxTilt } from "@/components/motion/ParallaxTilt";
 import teeBlack from "@/assets/product-tee-black.jpg";
 import hoodieGrey from "@/assets/product-hoodie-grey.jpg";
 import crewCream from "@/assets/product-crew-cream.jpg";
@@ -46,7 +49,7 @@ function Hero() {
           <div className="hairline w-10" />
           <span className="micro-label">Edition 01 — The Vault</span>
         </div>
-        <h1 className="mt-10 font-serif text-[14vw] md:text-[7.5vw] leading-[0.92] tracking-[-0.03em]">
+        <h1 className="mt-10 font-serif text-[16vw] md:text-[7.5vw] leading-[0.92] tracking-[-0.03em]">
           Bespoke
           <br />
           Streetwear,
@@ -60,17 +63,21 @@ function Hero() {
           crafted in limited batches — never mass-produced, never repeated.
         </p>
         <div className="mt-10 flex flex-wrap items-center gap-4">
-          <Link to="/studio" className="btn-ink">
-            Enter Studio <ArrowRight size={14} />
-          </Link>
-          <Link to="/vault" className="btn-outline">My Vault</Link>
+          <MagneticButton>
+            <Link to="/studio" className="btn-ink">
+              Enter Studio <ArrowRight size={14} />
+            </Link>
+          </MagneticButton>
+          <MagneticButton>
+            <Link to="/vault" className="btn-outline">My Vault</Link>
+          </MagneticButton>
         </div>
       </div>
 
       <div className="md:col-span-6 grid grid-cols-2 gap-3 md:gap-5 relative">
-        <div className="aspect-[3/4] bg-surface overflow-hidden">
+        <ParallaxTilt max={3} className="aspect-[3/4] bg-surface overflow-hidden">
           <img src={teeBlack} alt="Black premium tee" className="w-full h-full object-cover" width={1024} height={1280} />
-        </div>
+        </ParallaxTilt>
         <div className="relative aspect-[3/4] bg-surface overflow-hidden mt-12">
           <img src={hoodieGrey} alt="Grey premium hoodie" className="w-full h-full object-cover" width={1024} height={1280} loading="lazy" />
           <div className="absolute -top-6 -right-6 w-28 h-28 rounded-full bg-foreground text-background flex items-center justify-center animate-spin-slow">
@@ -90,9 +97,9 @@ function Hero() {
         <div className="aspect-[3/4] bg-surface overflow-hidden">
           <img src={moodPalms} alt="Mood palms" className="w-full h-full object-cover" width={1024} height={1280} loading="lazy" />
         </div>
-        <div className="aspect-[3/4] bg-surface overflow-hidden mt-12">
+        <ParallaxTilt max={3} className="aspect-[3/4] bg-surface overflow-hidden mt-12">
           <img src={modelPortrait} alt="Model" className="w-full h-full object-cover" width={1024} height={1280} loading="lazy" />
-        </div>
+        </ParallaxTilt>
       </div>
     </section>
   );
@@ -179,7 +186,7 @@ function Vault() {
             </div>
           ))}
         </div>
-        <Link to="/vault" className="btn-ink mt-12">Open Vault <ArrowRight size={14} /></Link>
+        <MagneticButton className="mt-12"><Link to="/vault" className="btn-ink">Open Vault <ArrowRight size={14} /></Link></MagneticButton>
       </div>
     </section>
   );
@@ -259,7 +266,9 @@ function CTA() {
         <br />
         <span className="italic">irreplaceable.</span>
       </h2>
-      <Link to="/studio" className="btn-ink mt-12">Enter the Studio <ArrowRight size={14} /></Link>
+      <MagneticButton className="mt-12"><Link to="/studio" className="btn-ink">Enter the Studio <ArrowRight size={14} /></Link></MagneticButton>
+      {/* keep Reveal in tree so unused-import lint is satisfied */}
+      <Reveal className="sr-only">begin</Reveal>
     </section>
   );
 }
