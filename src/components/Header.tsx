@@ -1,6 +1,6 @@
 import { Link } from "@tanstack/react-router";
 import { ShoppingBag } from "lucide-react";
-import { useStore } from "@/lib/store";
+import { useCart } from "@/lib/cart";
 
 const nav = [
   { to: "/studio", label: "Studio" },
@@ -11,7 +11,7 @@ const nav = [
 ];
 
 export function Header() {
-  const count = useStore((s) => s.count());
+  const { count } = useCart();
   return (
     <header className="sticky top-0 z-40 bg-background/85 backdrop-blur-md border-b border-border">
       <div className="container-edge flex items-center justify-between h-20">
