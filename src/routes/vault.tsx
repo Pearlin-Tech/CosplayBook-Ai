@@ -2,7 +2,7 @@ import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useState } from "react";
 import { motion, useInView } from "framer-motion";
 import { useRef } from "react";
-import { Plus, LogOut, BadgeCheck, Trash2, Edit3, Bookmark, MapPin, Bell, Shield, ShoppingBag } from "lucide-react";
+import { Plus, LogOut, BadgeCheck, Trash2, Edit3, Bookmark, MapPin, Bell, Shield, ShoppingBag, Heart } from "lucide-react";
 import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
 import { useSession } from "@/lib/session";
@@ -11,6 +11,7 @@ import { MagneticButton } from "@/components/motion/MagneticButton";
 import teeBlack from "@/assets/product-tee-black.jpg";
 import hoodieGrey from "@/assets/product-hoodie-grey.jpg";
 import crewCream from "@/assets/product-crew-cream.jpg";
+import pantsOlive from "@/assets/product-pants-olive.jpg";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -31,8 +32,10 @@ export const Route = createFileRoute("/vault")({
 const tabs = [
   { id: "orders", label: "Orders", icon: ShoppingBag },
   { id: "designs", label: "Designs", icon: Bookmark },
-  { id: "profile", label: "Profile", icon: Edit3 },
+  { id: "wishlist", label: "Wishlist", icon: Heart },
   { id: "addresses", label: "Addresses", icon: MapPin },
+  { id: "profile", label: "Account", icon: Edit3 },
+  { id: "alerts", label: "Alerts", icon: Bell },
   { id: "preferences", label: "Preferences", icon: Bell },
   { id: "security", label: "Danger Zone", icon: Shield },
 ] as const;
