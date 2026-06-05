@@ -142,8 +142,10 @@ function Vault() {
         <div className="min-w-0">
           {tab === "orders" && <Orders />}
           {tab === "designs" && <Designs />}
+          {tab === "wishlist" && <Wishlist />}
           {tab === "profile" && <Profile />}
           {tab === "addresses" && <Addresses />}
+          {tab === "alerts" && <Alerts />}
           {tab === "preferences" && <Preferences />}
           {tab === "security" && <DangerZone onLogout={handleLogout} />}
         </div>
