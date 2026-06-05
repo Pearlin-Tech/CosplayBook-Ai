@@ -403,6 +403,83 @@ function Preferences() {
   );
 }
 
+function Wishlist() {
+  const [items, setItems] = useState([
+    { id: "w1", name: "Atelier Hoodie · Cobalt", price: 210, img: hoodieGrey, stock: "In atelier" },
+    { id: "w2", name: "Heritage Tee · Obsidian", price: 95, img: teeBlack, stock: "Made-to-order" },
+    { id: "w3", name: "Cargo Pants · Olive", price: 245, img: pantsOlive, stock: "Edition · 12 remaining" },
+    { id: "w4", name: "Studio Crewneck · Cream", price: 145, img: crewCream, stock: "Restocking" },
+  ]);
+  return (
+    <div>
+      <span className="micro-label">Wishlist</span>
+      <h2 className="font-serif text-4xl mt-2">Coveted Editions</h2>
+      <p className="mt-2 text-sm text-foreground/55 italic-serif">Pieces you've earmarked for the next acquisition.</p>
+      <div className="mt-8 grid sm:grid-cols-2 gap-4">
+        {items.map((w) => (
+          <motion.div
+            key={w.id}
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="flex gap-4 p-4 bg-surface"
+          >
+            <img src={w.img} alt="" className="w-24 h-28 object-cover" />
+            <div className="flex-1 min-w-0">
+              <div className="font-serif text-lg truncate">{w.name}</div>
+              <div className="mt-1 text-[10px] font-mono uppercase tracking-[0.15em] text-[color:var(--gold)]">{w.stock}</div>
+              <div className="mt-2 font-mono">${w.price}</div>
+              <div className="mt-3 flex gap-2">
+                <Link to="/studio" className="text-[10px] uppercase tracking-[0.18em] px-3 py-2 bg-foreground text-background">Customize</Link>
+                <button onClick={() => setItems(items.filter((x) => x.id !== w.id))} className="text-[10px] uppercase tracking-[0.18em] px-3 py-2 border border-border hover:border-[color:var(--destructive)] hover:text-[color:var(--destructive)]">
+                  <Trash2 size={11} className="inline mr-1" /> Remove
+                </button>
+              </div>
+            </div>
+          </motion.div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+function Alerts() {
+  const alerts = [
+    { id: 1, title: "Order HV-2026-0241 — Crafting in Batch", time: "2h ago", tone: "gold", body: "Your Atelier Hoodie has entered the cut-and-sew pipeline." },
+    { id: 2, title: "New Edition Drop — Lunar Indigo Cargo", time: "1d ago", tone: "pop", body: "Limited 80 pieces · Vault members get early access." },
+    { id: 3, title: "Design saved to Vault", time: "3d ago", tone: "neutral", body: "Heritage Tee Draft · Obsidian · M was archived." },
+    { id: 4, title: "Shipping address verified", time: "6d ago", tone: "neutral", body: "Mumbai, MH · Confirmed by courier partner." },
+  ];
+  return (
+    <div>
+      <span className="micro-label">Atelier Signals</span>
+      <h2 className="font-serif text-4xl mt-2">Alerts</h2>
+      <div className="mt-8 space-y-3">
+        {alerts.map((a) => (
+          <motion.div
+            key={a.id}
+            initial={{ opacity: 0, x: -8 }}
+            animate={{ opacity: 1, x: 0 }}
+            className="flex gap-4 p-5 bg-surface relative overflow-hidden"
+          >
+            <span
+              className={`absolute left-0 top-0 bottom-0 w-1 ${
+                a.tone === "gold" ? "bg-[color:var(--gold)]" : a.tone === "pop" ? "bg-[color:var(--pop)]" : "bg-foreground/20"
+              }`}
+            />
+            <div className="flex-1">
+              <div className="flex items-baseline justify-between gap-3 flex-wrap">
+                <div className="font-serif text-lg">{a.title}</div>
+                <div className="text-[10px] font-mono uppercase tracking-[0.15em] text-foreground/50">{a.time}</div>
+              </div>
+              <p className="mt-1 text-sm text-foreground/65">{a.body}</p>
+            </div>
+          </motion.div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
 function DangerZone({ onLogout }: { onLogout: () => void }) {
   return (
     <div>
