@@ -1,20 +1,23 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { useMemo, useState } from "react";
+import { useMemo, useState, lazy, Suspense } from "react";
 import { AnimatePresence, motion, LayoutGroup } from "framer-motion";
-import { ArrowLeft, Upload, Minus, Plus, ShoppingBag, Check, Bookmark, RotateCcw } from "lucide-react";
+import {
+  ArrowLeft, Upload, Minus, Plus, ShoppingBag, Check, Bookmark,
+  Palette, Edit3, Image as ImageIcon, RotateCw, Sparkles, Trash2,
+} from "lucide-react";
 import { Header } from "@/components/Header";
 import { useCart } from "@/lib/cart";
 import { useSavedDesigns } from "@/lib/saved-designs";
-import { GARMENTS, COLORWAYS, type View, type Garment } from "@/lib/garments";
+import { GARMENTS, COLORWAYS, type Garment } from "@/lib/garments";
 import { MagneticButton } from "@/components/motion/MagneticButton";
-import { ParallaxTilt } from "@/components/motion/ParallaxTilt";
-import { ScanLine } from "@/components/motion/ScanLine";
+
+const Garment3D = lazy(() => import("@/components/studio/Garment3D"));
 
 export const Route = createFileRoute("/studio")({
   head: () => ({
     meta: [
       { title: "Studio — Hypervault" },
-      { name: "description", content: "Design every thread of your custom garment in real-time. Materials, color, graphics, typography." },
+      { name: "description", content: "Sculpt your bespoke garment in a real-time 3D atelier." },
     ],
   }),
   component: Studio,
@@ -27,6 +30,9 @@ const fonts = [
   { id: "mono", label: "JetBrains Mono", css: "'JetBrains Mono', monospace", italic: false },
 ];
 
+type Tool = "color" | "edit" | "bg" | "rotate" | "hd";
+type BgKey = "studio" | "warm" | "noir";
+
 function Studio() {
   const { add } = useCart();
   const { save } = useSavedDesigns();
@@ -36,7 +42,6 @@ function Studio() {
   const [printMethod, setPrintMethod] = useState(garment.printMethods[0]);
   const [size, setSize] = useState(garment.sizes[Math.floor(garment.sizes.length / 2)]);
   const [placementId, setPlacementId] = useState(garment.placements[0].id);
-  const [view, setView] = useState<View>("front");
   const [qty, setQty] = useState(1);
   const [customText, setCustomText] = useState("");
   const [font, setFont] = useState(fonts[0]);
@@ -44,19 +49,33 @@ function Studio() {
   const [design, setDesign] = useState<string | null>(null);
   const [added, setAdded] = useState<"added" | "saved" | null>(null);
 
+  // Toolbar state
+  const [activeTool, setActiveTool] = useState<Tool | null>(null);
+  const [autoRotate, setAutoRotate] = useState(false);
+  const [hd, setHd] = useState(true);
+  const [bg, setBg] = useState<BgKey>("studio");
+
   const price = useMemo(() => garment.basePrice + material.delta, [garment, material]);
   const placement = garment.placements.find((p) => p.id === placementId) ?? garment.placements[0];
-  const activePlacements = garment.placements.filter((p) => p.view === view);
-  const visiblePlacement = placement.view === view ? placement : null;
 
-  // when garment changes, reset compatible selections
+  const frontPlacement = useMemo(() => {
+    if (!design) return null;
+    const p = garment.placements.find((x) => x.id === placementId && x.view === "front");
+    return p ? { x: p.x, y: p.y, w: p.w } : null;
+  }, [design, garment, placementId]);
+
+  const backPlacement = useMemo(() => {
+    if (!design) return null;
+    const p = garment.placements.find((x) => x.id === placementId && x.view === "back");
+    return p ? { x: p.x, y: p.y, w: p.w } : null;
+  }, [design, garment, placementId]);
+
   const switchGarment = (g: Garment) => {
     setGarment(g);
     setMaterial((m) => g.materials.find((x) => x.id === m.id) ?? g.materials[0]);
     setPrintMethod((p) => g.printMethods.find((x) => x.id === p.id) ?? g.printMethods[0]);
     setSize((s) => (g.sizes.includes(s) ? s : g.sizes[Math.floor(g.sizes.length / 2)]));
     setPlacementId(g.placements[0].id);
-    setView("front");
   };
 
   const onFile = (f: File | null) => {
@@ -69,9 +88,7 @@ function Studio() {
       id: `${garment.id}-${color.name}-${size}-${Date.now()}`,
       name: garment.name,
       config: `${color.name} · ${material.name} · ${size} · ${placement.label}${customText ? ` · "${customText}"` : ""}`,
-      price,
-      qty,
-      image: garment.views.front,
+      price, qty, image: garment.views.front,
     });
     setAdded("added");
     setTimeout(() => setAdded(null), 2200);
@@ -79,25 +96,24 @@ function Studio() {
 
   const handleSave = () => {
     save({
-      garmentId: garment.id,
-      garmentName: garment.name,
-      colorName: color.name,
-      colorHex: color.hex,
-      materialName: material.name,
-      size,
-      placement: placement.label,
-      text: customText,
-      printMethod: printMethod.label,
-      price,
+      garmentId: garment.id, garmentName: garment.name,
+      colorName: color.name, colorHex: color.hex,
+      materialName: material.name, size,
+      placement: placement.label, text: customText,
+      printMethod: printMethod.label, price,
       thumb: garment.views.front,
     });
     setAdded("saved");
     setTimeout(() => setAdded(null), 2200);
   };
 
-  // resolve blend class
-  const blendClass = `print-${printMethod.blend}`;
-  const isLightColor = ["#FAF9F6", "#E8E2D5", "#D4FF00", "#c9b48a"].includes(color.hex);
+  const tools: { id: Tool; label: string; icon: any }[] = [
+    { id: "color", label: "Color", icon: Palette },
+    { id: "edit", label: "Edit", icon: Edit3 },
+    { id: "bg", label: "Backdrop", icon: ImageIcon },
+    { id: "rotate", label: "Rotate", icon: RotateCw },
+    { id: "hd", label: "HD", icon: Sparkles },
+  ];
 
   return (
     <div className="min-h-screen bg-background">
@@ -107,7 +123,7 @@ function Studio() {
         <Link to="/" className="inline-flex items-center gap-2 text-xs uppercase tracking-[0.2em] hover:text-[color:var(--gold)]">
           <ArrowLeft size={14} /> Back to Gallery
         </Link>
-        <span className="micro-label hidden md:inline">Atelier Studio · Live</span>
+        <span className="micro-label hidden md:inline">Atelier Studio · 3D · Live</span>
       </div>
 
       {/* Garment tabs */}
@@ -137,163 +153,162 @@ function Studio() {
       </div>
 
       <div className="container-edge grid lg:grid-cols-[1.2fr_1fr] gap-10 pt-8 pb-32">
-        {/* Preview canvas */}
+        {/* 3D Canvas */}
         <div className="lg:sticky lg:top-24 lg:self-start">
-          <motion.div
-            layout
-            transition={{ type: "spring", stiffness: 140, damping: 22 }}
-            className="relative bg-surface overflow-hidden mx-auto w-full"
-            style={{ aspectRatio: garment.aspect, maxWidth: 720 }}
-          >
-            <ParallaxTilt max={4} className="absolute inset-0">
-              <AnimatePresence mode="wait" initial={false}>
-                <motion.div
-                  key={`${garment.id}-${view}`}
-                  initial={{ rotateY: view === "back" ? -180 : 180, opacity: 0 }}
-                  animate={{ rotateY: 0, opacity: 1 }}
-                  exit={{ rotateY: view === "back" ? 180 : -180, opacity: 0 }}
-                  transition={{ duration: 0.7, ease: [0.4, 0.0, 0.2, 1] }}
-                  className="absolute inset-0"
-                  style={{ transformStyle: "preserve-3d", backfaceVisibility: "hidden" }}
-                >
-                  {/* color background tint */}
-                  <div
-                    className="absolute inset-0 transition-colors duration-500"
-                    style={{ backgroundColor: `${color.hex}0d` }}
-                  />
+          <div className="relative w-full mx-auto" style={{ maxWidth: 720 }}>
+            <motion.div
+              layout
+              className="relative bg-surface overflow-hidden"
+              style={{ aspectRatio: 1 }}
+            >
+              <Suspense fallback={<div className="absolute inset-0 grid place-items-center text-xs font-mono uppercase tracking-[0.2em] text-foreground/50">Loading atelier…</div>}>
+                <Garment3D
+                  frontUrl={garment.views.front}
+                  backUrl={garment.views.back}
+                  designUrl={design}
+                  designPlacement={frontPlacement}
+                  designOnBack={backPlacement}
+                  colorHex={color.hex}
+                  autoRotate={autoRotate}
+                  hd={hd}
+                  background={bg}
+                  aspect={garment.aspect}
+                />
+              </Suspense>
 
-                  {/* Grayscale base */}
-                  <img
-                    src={garment.views[view]}
-                    alt={`${garment.name} ${view}`}
-                    className="absolute inset-0 w-full h-full object-contain"
-                    style={{ filter: "grayscale(1) contrast(1.08) brightness(1.02)" }}
-                    width={1024}
-                    height={1280}
-                  />
-                  {/* Color multiply layer — preserves wrinkles/shadows */}
-                  <div
-                    className="absolute inset-0 pointer-events-none transition-colors duration-500"
-                    style={{
-                      backgroundColor: color.hex,
-                      mixBlendMode: "multiply",
-                      maskImage: `url(${garment.views[view]})`,
-                      WebkitMaskImage: `url(${garment.views[view]})`,
-                      maskSize: "contain",
-                      WebkitMaskSize: "contain",
-                      maskRepeat: "no-repeat",
-                      WebkitMaskRepeat: "no-repeat",
-                      maskPosition: "center",
-                      WebkitMaskPosition: "center",
-                    }}
-                  />
-                  {/* highlight retention */}
-                  <img
-                    src={garment.views[view]}
-                    alt=""
-                    aria-hidden
-                    className="absolute inset-0 w-full h-full object-contain pointer-events-none"
-                    style={{ mixBlendMode: "soft-light", opacity: 0.55 }}
-                  />
+              {/* corner brackets */}
+              <CornerBrackets />
 
-                  {/* Graphic overlay */}
-                  {design && visiblePlacement && (
-                    <div
-                      className={`absolute pointer-events-none ${blendClass}`}
-                      style={{
-                        left: `${visiblePlacement.x}%`,
-                        top: `${visiblePlacement.y}%`,
-                        width: `${visiblePlacement.w}%`,
-                        transform: `translate(-50%, -50%) rotate(${visiblePlacement.rotate ?? 0}deg)`,
-                      }}
-                    >
-                      <img src={design} alt="Your design" className="w-full h-auto" />
-                    </div>
-                  )}
+              {/* badges */}
+              <div className="absolute top-5 left-5 z-30 micro-label bg-background/85 backdrop-blur px-3 py-1.5 rounded-sm pointer-events-none">
+                Edition · 01 / Vault
+              </div>
+              <div className="absolute top-5 right-5 z-30 px-3 py-1.5 rounded-sm bg-foreground text-background text-[10px] font-mono uppercase tracking-[0.2em] flex items-center gap-1.5 pointer-events-none">
+                <span className="w-1.5 h-1.5 rounded-full bg-[color:var(--pop)] animate-pulse-beacon" />
+                {hd ? "HD" : "Draft"}
+              </div>
+              <div className="absolute bottom-3 left-5 z-30 text-[10px] font-mono uppercase tracking-[0.2em] text-foreground/55 pointer-events-none">
+                Drag to orbit · Scroll to zoom
+              </div>
+            </motion.div>
 
-                  {/* Text overlay */}
-                  {customText && visiblePlacement && (
-                    <div
-                      className={`absolute pointer-events-none text-center leading-none ${blendClass}`}
-                      style={{
-                        left: `${visiblePlacement.x}%`,
-                        top: `${visiblePlacement.y + (design ? 10 : 0)}%`,
-                        width: `${visiblePlacement.w * 1.4}%`,
-                        transform: "translate(-50%, -50%)",
-                        fontFamily: font.css,
-                        fontStyle: font.italic ? "italic" : "normal",
-                        color: textColor,
-                        fontSize: "clamp(10px, 2.6vw, 28px)",
-                        letterSpacing: "0.02em",
-                      }}
-                    >
-                      {customText}
-                    </div>
-                  )}
-
-                  {/* placement guide dots */}
-                  {activePlacements.map((p) => (
+            {/* Sticky Toolbar */}
+            <div className="mt-4 bg-background border border-border">
+              <div className="grid grid-cols-5">
+                {tools.map((t) => {
+                  const Icon = t.icon;
+                  const active =
+                    (t.id === "rotate" && autoRotate) ||
+                    (t.id === "hd" && hd) ||
+                    activeTool === t.id;
+                  return (
                     <button
-                      key={p.id}
-                      onClick={() => setPlacementId(p.id)}
-                      className={`absolute rounded-full transition-all -translate-x-1/2 -translate-y-1/2 ${
-                        p.id === placementId
-                          ? "bg-[color:var(--pop)] ring-2 ring-foreground"
-                          : "bg-foreground/30 hover:bg-foreground/60"
-                      }`}
-                      style={{
-                        left: `${p.x}%`,
-                        top: `${p.y}%`,
-                        width: 10,
-                        height: 10,
+                      key={t.id}
+                      onClick={() => {
+                        if (t.id === "rotate") { setAutoRotate(!autoRotate); return; }
+                        if (t.id === "hd") { setHd(!hd); return; }
+                        setActiveTool(activeTool === t.id ? null : t.id);
                       }}
-                      title={p.label}
-                    />
-                  ))}
-                </motion.div>
+                      className={`relative flex flex-col items-center gap-1.5 py-4 text-[10px] font-mono uppercase tracking-[0.18em] transition-colors border-r border-border last:border-r-0 ${
+                        active ? "bg-[color:var(--pop)] text-foreground" : "hover:bg-surface text-foreground/70"
+                      }`}
+                    >
+                      <Icon size={16} strokeWidth={1.4} />
+                      {t.label}
+                    </button>
+                  );
+                })}
+              </div>
+
+              {/* Slide-out panels */}
+              <AnimatePresence initial={false}>
+                {activeTool === "color" && (
+                  <ToolPanel key="color">
+                    <div className="micro-label mb-3">Fabric · Colorway</div>
+                    <div className="grid grid-cols-10 gap-2">
+                      {COLORWAYS.map((c) => (
+                        <button
+                          key={c.name}
+                          onClick={() => setColor(c)}
+                          className={`aspect-square rounded-full border-2 transition-all ${color.name === c.name ? "border-foreground scale-110" : "border-border hover:scale-105"}`}
+                          style={{ backgroundColor: c.hex }}
+                          title={c.name}
+                        />
+                      ))}
+                    </div>
+                    <div className="mt-3 flex items-center justify-between text-[10px] font-mono uppercase tracking-[0.15em] text-foreground/55">
+                      <span>{color.name} · {color.hex}</span>
+                      <span>color-masked into weave</span>
+                    </div>
+                  </ToolPanel>
+                )}
+
+                {activeTool === "edit" && (
+                  <ToolPanel key="edit">
+                    <div className="micro-label mb-3">Placement Zones</div>
+                    <div className="grid grid-cols-3 gap-2">
+                      {garment.placements.map((p) => (
+                        <button
+                          key={p.id}
+                          onClick={() => setPlacementId(p.id)}
+                          className={`p-3 text-[10px] uppercase tracking-[0.15em] border text-left transition-colors ${
+                            placementId === p.id ? "bg-foreground text-background border-foreground" : "border-border hover:border-foreground"
+                          }`}
+                        >
+                          <div className="font-mono opacity-60">[{p.view}]</div>
+                          {p.label}
+                        </button>
+                      ))}
+                    </div>
+                    {design && (
+                      <div className="mt-4 flex items-center justify-between bg-surface px-3 py-2">
+                        <span className="text-xs italic-serif text-foreground/70 truncate">Artwork layer active · blend: {printMethod.blend}</span>
+                        <button onClick={() => setDesign(null)} className="text-[color:var(--destructive)] hover:opacity-70" title="Delete graphic">
+                          <Trash2 size={14} />
+                        </button>
+                      </div>
+                    )}
+                  </ToolPanel>
+                )}
+
+                {activeTool === "bg" && (
+                  <ToolPanel key="bg">
+                    <div className="micro-label mb-3">Studio Backdrop</div>
+                    <div className="grid grid-cols-3 gap-2">
+                      {([
+                        { id: "studio", label: "Linen Studio", hex: "#F4F3F0" },
+                        { id: "warm", label: "Warm Apartment", hex: "#EAE2D3" },
+                        { id: "noir", label: "Noir Vault", hex: "#141414" },
+                      ] as { id: BgKey; label: string; hex: string }[]).map((b) => (
+                        <button
+                          key={b.id}
+                          onClick={() => setBg(b.id)}
+                          className={`p-3 text-left border transition-colors ${bg === b.id ? "border-foreground" : "border-border hover:border-foreground/50"}`}
+                        >
+                          <span className="block w-full h-10 mb-2" style={{ backgroundColor: b.hex }} />
+                          <span className="text-[10px] font-mono uppercase tracking-[0.15em]">{b.label}</span>
+                        </button>
+                      ))}
+                    </div>
+                  </ToolPanel>
+                )}
               </AnimatePresence>
-            </ParallaxTilt>
-
-            {/* scan line — re-mounts on key change */}
-            <ScanLine trigger={`${garment.id}-${color.hex}-${material.id}-${view}`} />
-
-            {/* badges */}
-            <div className="absolute top-5 left-5 z-30 micro-label bg-background/85 backdrop-blur px-3 py-1.5 rounded-sm">
-              Edition · 01 / Vault
             </div>
-            <div className="absolute top-5 right-5 z-30 px-3 py-1.5 rounded-sm bg-foreground text-background text-[10px] font-mono uppercase tracking-[0.2em] flex items-center gap-1.5">
-              <span className="w-1.5 h-1.5 rounded-full bg-[color:var(--pop)] animate-pulse-beacon" />
-              Live
+
+            {/* Secondary actions */}
+            <div className="mt-3 grid grid-cols-2 gap-2">
+              <label className="cursor-pointer">
+                <input type="file" accept="image/png" hidden onChange={(e) => onFile(e.target.files?.[0] ?? null)} />
+                <div className="btn-outline w-full justify-center text-[10px]">
+                  <Upload size={12} /> Upload 360 Image
+                </div>
+              </label>
+              <MagneticButton>
+                <button onClick={handleAdd} className="btn-ink w-full justify-center text-[10px]">
+                  {added === "added" ? <><Check size={12}/> Vaulted</> : <><ShoppingBag size={12}/> Add Custom Creation to Bag</>}
+                </button>
+              </MagneticButton>
             </div>
-          </motion.div>
-
-          {/* view toggle — true reverse perspective */}
-          <div className="mt-5 grid grid-cols-2 gap-2 max-w-[720px] mx-auto">
-            {(["front", "back"] as View[]).map((v) => (
-              <button
-                key={v}
-                onClick={() => setView(v)}
-                className={`py-3.5 text-[11px] uppercase tracking-[0.2em] border transition-all flex items-center justify-center gap-2 ${
-                  view === v
-                    ? "bg-foreground text-background border-foreground"
-                    : "border-border text-foreground/70 hover:border-foreground"
-                }`}
-              >
-                {v === "back" && <RotateCcw size={12} />}
-                {v} view
-              </button>
-            ))}
-          </div>
-
-          {/* zone callouts */}
-          <div className="mt-4 max-w-[720px] mx-auto flex flex-wrap gap-2">
-            {garment.zoneCallouts
-              .filter((z) => z.view === view)
-              .map((z) => (
-                <span key={z.name} className="text-[10px] font-mono uppercase tracking-[0.15em] px-2 py-1 bg-surface text-foreground/55">
-                  · {z.name}
-                </span>
-              ))}
           </div>
         </div>
 
@@ -335,31 +350,6 @@ function Studio() {
             </div>
           </Accordion>
 
-          <Accordion title="Colorway" value={color.name}>
-            <div className="grid grid-cols-5 sm:grid-cols-10 gap-3">
-              {COLORWAYS.map((c) => (
-                <button
-                  key={c.name}
-                  onClick={() => setColor(c)}
-                  className={`relative aspect-square rounded-full border-2 transition-all ${
-                    color.name === c.name ? "border-foreground scale-110" : "border-border hover:scale-105"
-                  }`}
-                  style={{ backgroundColor: c.hex }}
-                  title={c.name}
-                >
-                  {color.name === c.name && (
-                    <span className="absolute inset-0 flex items-center justify-center">
-                      <Check size={12} className={["#FAF9F6", "#E8E2D5", "#D4FF00", "#c9b48a"].includes(c.hex) ? "text-foreground" : "text-background"} />
-                    </span>
-                  )}
-                </button>
-              ))}
-            </div>
-            <div className="mt-3 text-[11px] font-mono uppercase tracking-[0.15em] text-foreground/55">
-              Hex {color.hex} · color masked into garment weave
-            </div>
-          </Accordion>
-
           <Accordion title="Graphic" value={design ? "Uploaded" : "None"}>
             <label className="block border border-dashed border-[color:var(--gold)] p-8 text-center cursor-pointer hover:bg-surface transition-colors">
               <input type="file" accept="image/*" hidden onChange={(e) => onFile(e.target.files?.[0] ?? null)} />
@@ -373,27 +363,6 @@ function Studio() {
                 <button onClick={() => setDesign(null)} className="underline underline-offset-4 hover:text-foreground/80">Remove</button>
               </div>
             )}
-          </Accordion>
-
-          <Accordion title={`Placement (${view})`} value={placement.label}>
-            <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
-              {activePlacements.map((p) => (
-                <button
-                  key={p.id}
-                  onClick={() => setPlacementId(p.id)}
-                  className={`p-3 text-xs uppercase tracking-[0.15em] border transition-colors ${
-                    placement.id === p.id
-                      ? "bg-foreground text-background border-foreground"
-                      : "border-border hover:border-foreground"
-                  }`}
-                >
-                  {p.label}
-                </button>
-              ))}
-              {activePlacements.length === 0 && (
-                <p className="text-xs text-foreground/50 col-span-full">Flip to the other view to see additional placement coordinates.</p>
-              )}
-            </div>
           </Accordion>
 
           <Accordion title="Typography" value={customText || "—"}>
@@ -501,10 +470,33 @@ function Studio() {
             </MagneticButton>
           </div>
         </div>
-        {/* tiny ignore note */}
-        <div className="sr-only" aria-live="polite">{isLightColor ? "Light colorway" : "Deep colorway"}</div>
       </div>
     </div>
+  );
+}
+
+function CornerBrackets() {
+  return (
+    <>
+      <span className="absolute top-2 left-2 w-5 h-5 border-t border-l border-[color:var(--gold)] z-20 pointer-events-none" />
+      <span className="absolute top-2 right-2 w-5 h-5 border-t border-r border-[color:var(--gold)] z-20 pointer-events-none" />
+      <span className="absolute bottom-2 left-2 w-5 h-5 border-b border-l border-[color:var(--gold)] z-20 pointer-events-none" />
+      <span className="absolute bottom-2 right-2 w-5 h-5 border-b border-r border-[color:var(--gold)] z-20 pointer-events-none" />
+    </>
+  );
+}
+
+function ToolPanel({ children }: { children: React.ReactNode }) {
+  return (
+    <motion.div
+      initial={{ height: 0, opacity: 0 }}
+      animate={{ height: "auto", opacity: 1 }}
+      exit={{ height: 0, opacity: 0 }}
+      transition={{ duration: 0.35, ease: [0.2, 0.7, 0.2, 1] }}
+      className="overflow-hidden border-t border-border"
+    >
+      <div className="p-5">{children}</div>
+    </motion.div>
   );
 }
 
