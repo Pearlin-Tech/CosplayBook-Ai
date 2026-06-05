@@ -20,8 +20,9 @@ export function TextSplit({
   as?: ElementType;
 }) {
   const words = text.split(" ");
+  const Comp = Tag as ElementType;
   return (
-    <Tag className={cn("inline-block", className)}>
+    <Comp className={cn("inline-block", className)}>
       {words.map((w, i) => (
         <span
           key={i}
@@ -43,7 +44,7 @@ export function TextSplit({
           </motion.span>
         </span>
       ))}
-    </Tag>
+    </Comp>
   );
 }
 
