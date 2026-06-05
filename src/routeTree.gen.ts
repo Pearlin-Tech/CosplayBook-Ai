@@ -9,18 +9,26 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as VendorRouteImport } from './routes/vendor'
 import { Route as VaultRouteImport } from './routes/vault'
 import { Route as SuccessRouteImport } from './routes/success'
 import { Route as StudioRouteImport } from './routes/studio'
 import { Route as SizingRouteImport } from './routes/sizing'
 import { Route as ReviewsRouteImport } from './routes/reviews'
+import { Route as LoginRouteImport } from './routes/login'
 import { Route as JournalRouteImport } from './routes/journal'
 import { Route as ContactRouteImport } from './routes/contact'
 import { Route as CollectionsRouteImport } from './routes/collections'
 import { Route as CheckoutRouteImport } from './routes/checkout'
 import { Route as CareRouteImport } from './routes/care'
+import { Route as AdminRouteImport } from './routes/admin'
 import { Route as IndexRouteImport } from './routes/index'
 
+const VendorRoute = VendorRouteImport.update({
+  id: '/vendor',
+  path: '/vendor',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const VaultRoute = VaultRouteImport.update({
   id: '/vault',
   path: '/vault',
@@ -44,6 +52,11 @@ const SizingRoute = SizingRouteImport.update({
 const ReviewsRoute = ReviewsRouteImport.update({
   id: '/reviews',
   path: '/reviews',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const LoginRoute = LoginRouteImport.update({
+  id: '/login',
+  path: '/login',
   getParentRoute: () => rootRouteImport,
 } as any)
 const JournalRoute = JournalRouteImport.update({
@@ -71,6 +84,11 @@ const CareRoute = CareRouteImport.update({
   path: '/care',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AdminRoute = AdminRouteImport.update({
+  id: '/admin',
+  path: '/admin',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
@@ -79,102 +97,130 @@ const IndexRoute = IndexRouteImport.update({
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/admin': typeof AdminRoute
   '/care': typeof CareRoute
   '/checkout': typeof CheckoutRoute
   '/collections': typeof CollectionsRoute
   '/contact': typeof ContactRoute
   '/journal': typeof JournalRoute
+  '/login': typeof LoginRoute
   '/reviews': typeof ReviewsRoute
   '/sizing': typeof SizingRoute
   '/studio': typeof StudioRoute
   '/success': typeof SuccessRoute
   '/vault': typeof VaultRoute
+  '/vendor': typeof VendorRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/admin': typeof AdminRoute
   '/care': typeof CareRoute
   '/checkout': typeof CheckoutRoute
   '/collections': typeof CollectionsRoute
   '/contact': typeof ContactRoute
   '/journal': typeof JournalRoute
+  '/login': typeof LoginRoute
   '/reviews': typeof ReviewsRoute
   '/sizing': typeof SizingRoute
   '/studio': typeof StudioRoute
   '/success': typeof SuccessRoute
   '/vault': typeof VaultRoute
+  '/vendor': typeof VendorRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/admin': typeof AdminRoute
   '/care': typeof CareRoute
   '/checkout': typeof CheckoutRoute
   '/collections': typeof CollectionsRoute
   '/contact': typeof ContactRoute
   '/journal': typeof JournalRoute
+  '/login': typeof LoginRoute
   '/reviews': typeof ReviewsRoute
   '/sizing': typeof SizingRoute
   '/studio': typeof StudioRoute
   '/success': typeof SuccessRoute
   '/vault': typeof VaultRoute
+  '/vendor': typeof VendorRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
+    | '/admin'
     | '/care'
     | '/checkout'
     | '/collections'
     | '/contact'
     | '/journal'
+    | '/login'
     | '/reviews'
     | '/sizing'
     | '/studio'
     | '/success'
     | '/vault'
+    | '/vendor'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
+    | '/admin'
     | '/care'
     | '/checkout'
     | '/collections'
     | '/contact'
     | '/journal'
+    | '/login'
     | '/reviews'
     | '/sizing'
     | '/studio'
     | '/success'
     | '/vault'
+    | '/vendor'
   id:
     | '__root__'
     | '/'
+    | '/admin'
     | '/care'
     | '/checkout'
     | '/collections'
     | '/contact'
     | '/journal'
+    | '/login'
     | '/reviews'
     | '/sizing'
     | '/studio'
     | '/success'
     | '/vault'
+    | '/vendor'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  AdminRoute: typeof AdminRoute
   CareRoute: typeof CareRoute
   CheckoutRoute: typeof CheckoutRoute
   CollectionsRoute: typeof CollectionsRoute
   ContactRoute: typeof ContactRoute
   JournalRoute: typeof JournalRoute
+  LoginRoute: typeof LoginRoute
   ReviewsRoute: typeof ReviewsRoute
   SizingRoute: typeof SizingRoute
   StudioRoute: typeof StudioRoute
   SuccessRoute: typeof SuccessRoute
   VaultRoute: typeof VaultRoute
+  VendorRoute: typeof VendorRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/vendor': {
+      id: '/vendor'
+      path: '/vendor'
+      fullPath: '/vendor'
+      preLoaderRoute: typeof VendorRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/vault': {
       id: '/vault'
       path: '/vault'
@@ -208,6 +254,13 @@ declare module '@tanstack/react-router' {
       path: '/reviews'
       fullPath: '/reviews'
       preLoaderRoute: typeof ReviewsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/login': {
+      id: '/login'
+      path: '/login'
+      fullPath: '/login'
+      preLoaderRoute: typeof LoginRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/journal': {
@@ -245,6 +298,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof CareRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/admin': {
+      id: '/admin'
+      path: '/admin'
+      fullPath: '/admin'
+      preLoaderRoute: typeof AdminRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/': {
       id: '/'
       path: '/'
@@ -257,17 +317,30 @@ declare module '@tanstack/react-router' {
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  AdminRoute: AdminRoute,
   CareRoute: CareRoute,
   CheckoutRoute: CheckoutRoute,
   CollectionsRoute: CollectionsRoute,
   ContactRoute: ContactRoute,
   JournalRoute: JournalRoute,
+  LoginRoute: LoginRoute,
   ReviewsRoute: ReviewsRoute,
   SizingRoute: SizingRoute,
   StudioRoute: StudioRoute,
   SuccessRoute: SuccessRoute,
   VaultRoute: VaultRoute,
+  VendorRoute: VendorRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { startInstance } from './start.ts'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+    config: Awaited<ReturnType<typeof startInstance.getOptions>>
+  }
+}
