@@ -11,7 +11,7 @@ export function TextSplit({
   className,
   delay = 0,
   stagger = 0.06,
-  as: Tag = "span",
+  as = "span",
 }: {
   text: string;
   className?: string;
@@ -20,9 +20,10 @@ export function TextSplit({
   as?: ElementType;
 }) {
   const words = text.split(" ");
-  const Comp = Tag as ElementType;
+  const Comp: any = as;
   return (
     <Comp className={cn("inline-block", className)}>
+
       {words.map((w, i) => (
         <span
           key={i}
