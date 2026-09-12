@@ -1,5 +1,5 @@
 import { createContext, useContext, useState, useCallback, useEffect, ReactNode } from "react";
-
+import { useNavigate } from "@tanstack/react-router";
 export type SessionUser = {
   name: string;
   email: string;
@@ -57,7 +57,11 @@ export function SessionProvider({ children }: { children: ReactNode }) {
   }, [user]);
 
   const signIn = useCallback(() => setUser(DEFAULT_USER), []);
-  const signOut = useCallback(() => setUser(null), []);
+  const navigate = useNavigate({ strict: false });
+  const signOut = useCallback(() => {
+    setUser(null);
+    navigate({ to: "/login" });
+  }, [navigate]);
   const update = useCallback(
     (patch: Partial<SessionUser>) => setUser((u) => (u ? { ...u, ...patch } : u)),
     [],
