@@ -1,5 +1,5 @@
 const createChainableMock = () => {
-  const mock = new Proxy(() => {}, {
+  return new Proxy(() => {}, {
     get: (target, prop) => {
       if (prop === 'then') {
         return (resolve) => resolve({ data: null, error: new Error('unavailable') });
@@ -10,11 +10,11 @@ const createChainableMock = () => {
       return createChainableMock();
     }
   });
-  return mock;
 };
 const p = createChainableMock();
-async function run() {
-  const res = await p.from('x').select('*').eq('id', 1).maybeSingle();
-  console.log("Result:", res);
+try {
+  JSON.stringify(p);
+  console.log("Success");
+} catch(e) {
+  console.log("Error:", e.message);
 }
-run();
