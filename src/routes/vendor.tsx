@@ -4,6 +4,8 @@ import { supabase } from "../lib/supabase";
 
 export const Route = createFileRoute("/vendor")({
   beforeLoad: async () => {
+    if (import.meta.env.VITE_DEMO_MODE === "true") return;
+
     const { data: { session } } = await supabase.auth.getSession();
     if (!session) throw redirect({ to: "/login" });
 

@@ -70,7 +70,7 @@ function Vault() {
 
   const handleLogout = () => {
     signOut();
-    navigate({ to: "/" });
+    navigate({ to: "/login" });
   };
 
   return (
