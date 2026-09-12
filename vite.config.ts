@@ -3,7 +3,6 @@ import netlify from "@netlify/vite-plugin-tanstack-start";
 
 export default defineConfig({
   tanstackStart: {
-    ssr: false,
     server: { entry: "server" },
   },
   plugins: [netlify()],
