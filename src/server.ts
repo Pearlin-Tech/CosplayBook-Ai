@@ -40,11 +40,45 @@ async function normalizeCatastrophicSsrResponse(response: Response): Promise<Res
 export default {
   async fetch(request: Request, env: unknown, ctx: unknown) {
     try {
+      console.log(`[SSR] BEFORE rendering: ${request.url}`);
       const handler = await getServerEntry();
+      console.log(`[SSR] AFTER getServerEntry`);
+      
       const response = await handler.fetch(request, env, ctx);
-      return await normalizeCatastrophicSsrResponse(response);
+      console.log(`[SSR] AFTER the React/TanStack render function starts. Status: ${response.status}`);
+
+      let finalResponse = await normalizeCatastrophicSsrResponse(response);
+
+      if (finalResponse.body) {
+        let firstChunk = true;
+        const transform = new TransformStream({
+          start() {
+            console.log(`[SSR] stream started`);
+          },
+          transform(chunk, controller) {
+            if (firstChunk) {
+              console.log(`[SSR] first streamed chunk received. Size: ${chunk?.length ?? chunk?.byteLength ?? 'unknown'}`);
+              firstChunk = false;
+            }
+            controller.enqueue(chunk);
+          },
+          flush() {
+            console.log(`[SSR] stream close / render completion`);
+          }
+        });
+        
+        finalResponse = new Response(finalResponse.body.pipeThrough(transform), {
+          status: finalResponse.status,
+          statusText: finalResponse.statusText,
+          headers: finalResponse.headers,
+        });
+      } else {
+        console.log(`[SSR] Response has no body stream.`);
+      }
+
+      return finalResponse;
     } catch (error) {
-      console.error(error);
+      console.error(`[SSR] stream error / catastrophic error:`, error);
       return new Response(renderErrorPage(), {
         status: 500,
         headers: { "content-type": "text/html; charset=utf-8" },
